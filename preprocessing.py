@@ -6,7 +6,7 @@ from PIL import Image
 from PIL import ImageFilter
 
 
-clazz = "00022"
+clazz = "00003"
 path = os.path.dirname(os.path.abspath(__file__))+"/GTSRB/Final_Training/Images/"+clazz
 csv_file = "GT-"+clazz+".csv"
 
@@ -77,5 +77,3 @@ with open(path + '/' + csv_file, 'rb') as dataoverview:
         im = im.convert("L")
         print "Reduced colors: " + row['Filename']
         save(row, im, "grey", filetype = "pgm")
-
-print os.path.dirname(os.path.abspath(__file__))
