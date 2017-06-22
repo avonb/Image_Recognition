@@ -15,7 +15,6 @@ create.vector <- function (class, filename, grey = TRUE){
     filename = paste(substr(filename,1,stri_length(filename)-4), ".pgm", sep="")
   }
   image <- read.pnm(paste(path, class,"/grey/", filename, sep=""))
-  #plot(image)
   res <- getChannels(image)
   dim(res) <- NULL
   res
