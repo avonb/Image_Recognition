@@ -3,24 +3,30 @@ library(stringi)
 library(class)
 
 path = "/Users/arnevonberg/Documents/Image_Recognition/GTSRB/Final_Training/Images/"
-class = "00000"
+classes= c("00000", "00005")
 
-overview_csv <- function (class){
+#Creates data frame from overview csv
+loadClassCSV <- function (class){
   file = paste(path, class, "/GT-", class, ".csv", sep ="")
   read.csv(file, header = TRUE, sep = ";")
 }
 
+#Creates vector from image
 create.vector <- function (class, filename, grey = TRUE){
   if(grey){
+    #Monochromatic images have different file type
     filename = paste(substr(filename,1,stri_length(filename)-4), ".pgm", sep="")
   }
+  #TODO Preprocessing folder anpassen
   image <- read.pnm(paste(path, class,"/grey/", filename, sep=""))
   res <- getChannels(image)
   dim(res) <- NULL
   res
 }
 
-create.matrix <- function (class, files, grey = TRUE){
+#Creates matrix from all images
+create.matrix <- function (class, grey = TRUE){
+  files <- loadClassCSV(class)
   mat = c()
   for(i in 1:nrow(files)){
     mat = c(mat,create.vector(class, files["Filename"][i,], grey=grey))
@@ -29,30 +35,68 @@ create.matrix <- function (class, files, grey = TRUE){
          / length(files["Filename"][,1]))
 }
 
+#combines data from all class into one data frame with classification 
+combinedData <- function (classes, grey = TRUE){
+  data = c()
+  #Classification of items
+  cl = c()
+  for(i in 1:length(classes)){
+    mat <- create.matrix(classes[i], grey=grey)
+    cl = c(cl, rep(classes[i], dim(mat)[2]))
+    data <- cbind(data,mat)
+  }
+  res = list("data"=data, "classification" = cl)
+  res
+}
+
+# total number of samples has to be dividable by size
+create.samplegroups <- function(data, cl, size){
+  n = length(cl)
+  perm = sample(c(1:n), replace = FALSE)
+  res = list()
+  for(i in 0:floor(n/size-1)){
+    upper = i * size + 1
+    lower = i * size + size
+    res[[i + 1]] <- list("data" = data[,perm[lower:upper]], 
+                       "class" = cl[perm[lower:upper]])
+  }
+  res
+}
+
+#Plots image from vector
 plot.vectorImage <- function(vec){
   b = pixmapGrey(data=vec,nrow=40,ncol=40)
   plot(b)
 }
 
-patter.recognition <- function(class1, class2, method, test=""){
-  files1 <- overview_csv(class1)
-  files2 <- overview_csv(class2)
-  a <- create.matrix(class1, files1, grey=TRUE)
-  b <- create.matrix(class2, files2, grey=TRUE)
-  if(method == "knn"){
-    sample1 <- sample(1:length(a[1,]),dim(a)[2],replace = FALSE)
-    sample2 <- sample(1:length(b[1,]),dim(b)[2],replace = FALSE)
-    train <- cbind(a[,sample1[1:floor(length(sample1)*0.9)]], 
-                   b[,sample2[1:floor(length(sample2)*0.9)]])
-    test <- cbind(a[,sample1[floor(length(sample1)*0.9+1):length(sample1)]], 
-                  b[,sample2[floor(length(sample2)*0.9+1):length(sample2)]])
-    cl <- factor(c(rep(class1, floor(length(sample1)*0.9)),
-                   rep(class2, floor(length(sample2)*0.9))))
-    knn(t(train), t(test), cl, k=3, prob=TRUE)
+pattern.recognition <- function(samples, method){
+  reslist = list()
+  total = 0;
+  right = 0;
+  for(i in 1:length(samples)){
+    
+    train_data = c()
+    train_cl = c()
+    test_data = samples[[i]]$data
+    test_cl = samples[[i]]$class
+    
+    for(j in 1:length(samples)){
+      if(i != j){
+        tmp = samples[[j]]
+        train_data = cbind(train_data, tmp$data)
+        train_cl = c(train_cl, tmp$class)
+      }
+    }
+    print(paste("Group", i, "of", length(samples), "is being tested"))
+    classification <- knn(t(train_data), t(test_data), train_cl, k=3)
+    total = total + length(classification)
+    right = right + sum(classification == test_cl) 
   }
+  print(paste(right, "out of", total, "signs were classified right by", method))
+  ratio = right / total
+  ratio
 }
 
-files = overview_csv(class)
-a <- create.matrix(class, files, grey=TRUE)
-plot.vectorImage(rowMeans(a))
-
+a <- combinedData(classes, grey=TRUE)
+b <- create.samplegroups(a[[1]], a[[2]],100)
+c <- pattern.recognition(b, "knn")

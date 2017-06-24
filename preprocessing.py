@@ -5,10 +5,11 @@ import operator
 from PIL import Image
 from PIL import ImageFilter
 
-
-clazz = "00003"
-path = os.path.dirname(os.path.abspath(__file__))+"/GTSRB/Final_Training/Images/"+clazz
-csv_file = "GT-"+clazz+".csv"
+def getClass(num):
+    if(num < 10):
+        return "0000" + str(num)
+    else:
+        return "000" + str(num)
 
 def resize(data, image ,height, width):
     area = map(float,(data['Roi.X1'],data['Roi.Y1'],data['Roi.X2'],data['Roi.Y2']))
@@ -45,7 +46,7 @@ def equalize(image):
 
     return image.point(colors)
 
-def save(data, image, step, filetype = None):
+def save(path, data, image, step, filetype = None):
     img_path = path + '/' + step
     if not os.path.exists(img_path):
         os.makedirs(img_path)
@@ -57,23 +58,32 @@ def save(data, image, step, filetype = None):
     image.save(img_path + '/' + name)
 
 
-with open(path + '/' + csv_file, 'rb') as dataoverview:
-    reader = csv.DictReader(dataoverview, delimiter=';')
-    for row in reader:
-        im = Image.open(path + '/' + row['Filename'])
+def preprocess(clazz):
+    path = os.path.dirname(os.path.abspath(__file__))
+    path = path + "/GTSRB/Final_Training/Images/" + getClass(clazz)
+    csv_file = "GT-"+getClass(clazz)+".csv"
+    print "Preprocessing class " + getClass(clazz)
 
-        im = resize(row, im, 40, 40)
-        print "Resized: " + row['Filename']
-        save(row, im, "resize")
+    with open(path + '/' + csv_file, 'rb') as dataoverview:
+        reader = csv.DictReader(dataoverview, delimiter=';')
+        for row in reader:
+            im = Image.open(path + '/' + row['Filename'])
 
-        im = equalize(im)
-        print "Equalized: " + row['Filename']
-        save(row, im, "equalize")
+            im = resize(row, im, 40, 40)
+            #print "Resized: " + row['Filename']
+            save(path, row, im, "resize")
 
-        im = im.filter(ImageFilter.SMOOTH_MORE)
-        print "Smoothed: " + row['Filename']
-        save(row, im, "smooth")
+            im = equalize(im)
+            #print "Equalized: " + row['Filename']
+            save(path, row, im, "equalize")
 
-        im = im.convert("L")
-        print "Reduced colors: " + row['Filename']
-        save(row, im, "grey", filetype = "pgm")
+            im = im.filter(ImageFilter.SMOOTH_MORE)
+            #print "Smoothed: " + row['Filename']
+            save(path, row, im, "smooth")
+
+            im = im.convert("L")
+            #print "Reduced colors: " + row['Filename']
+            save(path, row, im, "grey", filetype = "pgm")
+
+for i in range(0, 6):
+    preprocess(i)
