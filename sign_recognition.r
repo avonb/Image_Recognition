@@ -2,6 +2,7 @@ library(pixmap)
 library(stringi)
 library(class)
 library(e1071)
+library(nnet)
 path = "/Users/arnevonberg/Documents/Image_Recognition/GTSRB/Final_Training/Images/"
 classes= c("00000","00001") #,"00002","00003","00004","00005")
 
