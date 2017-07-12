@@ -1,9 +1,11 @@
+install.packages("e1071")
+
 library(pixmap)
 library(stringi)
 library(class)
-
-path = "/Users/arnevonberg/Documents/Image_Recognition/GTSRB/Final_Training/Images/"
-classes= c("00000", "00005")
+library(e1071)
+path = "/Users/Tobi/git/Image_Recognition/GTSRB/Final_Training/Images/"
+classes= c("00000","00001","00002","00003","00004","00005", "00007", "00008")
 
 #Creates data frame from overview csv
 loadClassCSV <- function (class){
@@ -69,12 +71,12 @@ plot.vectorImage <- function(vec){
   plot(b)
 }
 
-pattern.recognition <- function(samples, method){
+#Runs classification algorithms
+pattern.recognition <- function(samples){
   reslist = list()
   total = 0;
-  right = 0;
+  rightKNN = rightSVM = 0;
   for(i in 1:length(samples)){
-    
     train_data = c()
     train_cl = c()
     test_data = samples[[i]]$data
@@ -88,15 +90,56 @@ pattern.recognition <- function(samples, method){
       }
     }
     print(paste("Group", i, "of", length(samples), "is being tested"))
-    classification <- knn(t(train_data), t(test_data), train_cl, k=3)
-    total = total + length(classification)
-    right = right + sum(classification == test_cl) 
+    
+    classificationKNN <- knn(t(train_data), t(test_data), train_cl, k=3)
+    total = total + length(classificationKNN)
+    rightKNN = rightKNN + sum(classificationKNN == test_cl) 
+    print("Finished KNN for this group")
+    
+    d = data.frame("Data"=t(train_data), "Class"=train_cl)
+    model <- svm(Class ~ ., data = d, cost = 100, gamma = 1)
+    classificationSVM <- predict(model, t(test_data))
+    rightSVM = rightSVM + sum(classificationSVM == test_cl)
+    print("Finished SVM for this group")
   }
-  print(paste(right, "out of", total, "signs were classified right by", method))
-  ratio = right / total
-  ratio
+  print(paste(rightKNN, "out of", total, "signs were classified right by KNN"))
+  print(paste(rightSVM, "out of", total, "signs were classified right by SVM"))
 }
 
+
+
+###################################################################
+#####                                                         #####
+#####               Google Streetview Extension               #####
+#####                                                         #####
+###################################################################
+
+#repeat if necessary
 a <- combinedData(classes, grey=TRUE)
-b <- create.samplegroups(a[[1]], a[[2]],100)
-c <- pattern.recognition(b, "knn")
+
+crawledImgPath = "/Users/Tobi/git/Image_Recognition/crawledImages/grey"
+
+crawledImgs <- list.files(path = crawledImgPath)
+
+testFeatures = sapply(crawledImgs, function(x) {
+                        img = read.pnm(paste(crawledImgPath, x, sep="/"))
+                        testedFeatures <- getChannels(img)
+                        dim(testedFeatures) <- NULL
+                        testedFeatures
+                })
+testFeatures
+classificationKNN <- knn(t(a[[1]]), t(testFeatures[,"loc_52_5339344_13_2990433head_8732.pgm"]), a[[2]], k=3)
+classificationKNN
+d = data.frame("Data"=t(a[[1]]), "Class"=a[[2]])
+model <- svm(Class ~ ., data = d, cost = 100, gamma = 1)
+classificationSVM <- predict(model, t(testFeatures))
+classificationSVM #HOLY MOLY dauert das bei einem bild (okay, 12000 train daten) ewig?!?! wegen one vs. one?
+#-> http://r.gmum.net/samples/svm.multiclass.html als alternative?
+
+
+
+#evaluate performance on training data based on k-fold cross valudation
+
+a <- combinedData(classes, grey=TRUE)
+b <- create.samplegroups(a[[1]], a[[2]],600)
+c <- pattern.recognition(b)

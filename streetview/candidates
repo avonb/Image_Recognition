@@ -1,0 +1,22 @@
+Berlin:
+https://www.google.de/maps/@52.5339344,13.2990433,3a,75y,87.32h,87.99t/data=!3m6!1e1!3m4!1sVHLpebwiD_W1k8eUXc7EUQ!2e0!7i13312!8i6656 #half good
+https://www.google.de/maps/@52.4440963,13.4765733,3a,75y,134.5h,82.69t/data=!3m6!1e1!3m4!1s36SWCKhpBTsTUbGcOXLFcg!2e0!7i13312!8i6656 #bad
+https://www.google.de/maps/@52.4374266,13.4904748,3a,75y,128.45h,85.43t/data=!3m6!1e1!3m4!1snhKLldQGpaaNdPXmvUCfyg!2e0!7i13312!8i6656 #bad
+https://www.google.de/maps/@52.4327838,13.5005496,3a,75y,311.14h,73.93t/data=!3m6!1e1!3m4!1sFQama3PuLwRcHnxx8xuV7Q!2e0!7i13312!8i6656 #half good
+https://www.google.de/maps/@52.4931446,13.3313796,3a,75y,90.67h,84.19t/data=!3m6!1e1!3m4!1s2OSm1n6-o0KkLnoCUwKPMQ!2e0!7i13312!8i6656
+
+München:
+https://www.google.de/maps/@48.1490762,11.5369588,3a,75y,359.58h,91.63t/data=!3m6!1e1!3m4!1suOIrH8NnJdoTFz3-oPkpjQ!2e0!7i13312!8i6656 #good/decent
+https://www.google.de/maps/@48.1524902,11.5341085,3a,75y,135.37h,79.38t/data=!3m6!1e1!3m4!1sTx7paob-zSKEebZH-lGy_Q!2e0!7i13312!8i6656 #bad
+https://www.google.de/maps/@48.1223541,11.4798642,3a,75y,271.86h,74.08t/data=!3m6!1e1!3m4!1sziJcl3kIaHC0AjAFwBS7yA!2e0!7i13312!8i6656 #bad
+
+Düsseldorf:
+https://www.google.de/maps/@51.2185806,6.7665308,3a,75y,180.59h,85.93t/data=!3m6!1e1!3m4!1sO-DgaHgi1MyPHKrFlJ2dKg!2e0!7i13312!8i6656 #semi good: detects pedestrian sign as speed limit
+https://www.google.de/maps/@52.5061243,13.3175219,3a,75y,12.82h,68.17t/data=!3m6!1e1!3m4!1s2rRM_Rtax4HiOjUDaISqCQ!2e0!7i13312!8i6656
+
+Amsterdam:
+https://www.google.de/maps/@52.362024,4.8916571,3a,75y,208.16h,82.89t/data=!3m6!1e1!3m4!1sfmsV81qvH8aOLufcj4655Q!2e0!7i13312!8i6656 #very good
+
+Köln:
+https://www.google.de/maps/@50.9593704,6.9634309,3a,75y,264.14h,79.26t/data=!3m6!1e1!3m4!1sKnqJMkm6wTyYB6qt_lutWQ!2e0!7i13312!8i6656 # very good
+

@@ -1,9 +1,13 @@
 import csv
 import os
 import operator
+import sys
+import cv2
 
 from PIL import Image
 from PIL import ImageFilter
+
+from faceDetection import detectSpeedLimitSign
 
 def getClass(num):
     if(num < 10):
@@ -11,10 +15,10 @@ def getClass(num):
     else:
         return "000" + str(num)
 
-def resize(data, image ,height, width):
-    area = map(float,(data['Roi.X1'],data['Roi.Y1'],data['Roi.X2'],data['Roi.Y2']))
+def resize(x1,y1,x2,y2, image, height, width):
+    area = map(int,(x1,y1,x2,y2))
     cropim = image.crop(area)
-    out = cropim.resize((height,width))
+    out = cropim.resize((height, width))
     return out
 
 def equalize2(image):
@@ -46,19 +50,38 @@ def equalize(image):
 
     return image.point(colors)
 
-def save(path, data, image, step, filetype = None):
+def save(path, name, image, step, filetype = None):
     img_path = path + '/' + step
     if not os.path.exists(img_path):
         os.makedirs(img_path)
 
-    name = data['Filename']
+    #name = data['Filename']
     if filetype == "pgm":
         name = name[:-4] + ".pgm"
 
     image.save(img_path + '/' + name)
 
 
-def preprocess(clazz):
+def preprocess(path, imagename, x1, y1, x2, y2):
+    im = Image.open(path + '/' + imagename)
+
+    im = resize(x1, y1, x2, y2, im, 40, 40)
+    # print "Resized: " + row['Filename']
+    save(path, imagename, im, "resize")
+
+    im = equalize(im)
+    # print "Equalized: " + row['Filename']
+    save(path, imagename, im, "equalize")
+
+    im = im.filter(ImageFilter.SMOOTH_MORE)
+    # print "Smoothed: " + row['Filename']
+    save(path, imagename, im, "smooth")
+
+    im = im.convert("L")
+    # print "Reduced colors: " + row['Filename']
+    save(path, imagename, im, "grey", filetype="pgm")
+
+def preprocessGTSRB(clazz):
     path = os.path.dirname(os.path.abspath(__file__))
     path = path + "/GTSRB/Final_Training/Images/" + getClass(clazz)
     csv_file = "GT-"+getClass(clazz)+".csv"
@@ -67,23 +90,25 @@ def preprocess(clazz):
     with open(path + '/' + csv_file, 'rb') as dataoverview:
         reader = csv.DictReader(dataoverview, delimiter=';')
         for row in reader:
+
             im = Image.open(path + '/' + row['Filename'])
 
-            im = resize(row, im, 40, 40)
+            im = resize(row['Roi.X1'], row['Roi.Y1'], row['Roi.X2'], row['Roi.Y2'], im, 40, 40)
             #print "Resized: " + row['Filename']
-            save(path, row, im, "resize")
+            save(path, row['Filename'], im, "resize")
 
             im = equalize(im)
             #print "Equalized: " + row['Filename']
-            save(path, row, im, "equalize")
+            save(path, row['Filename'], im, "equalize")
 
             im = im.filter(ImageFilter.SMOOTH_MORE)
             #print "Smoothed: " + row['Filename']
-            save(path, row, im, "smooth")
+            save(path, row['Filename'], im, "smooth")
 
             im = im.convert("L")
             #print "Reduced colors: " + row['Filename']
-            save(path, row, im, "grey", filetype = "pgm")
+            save(path, row['Filename'], im, "grey", filetype = "pgm")
 
-for i in range(0, 6):
-    preprocess(i)
+if __name__ == '__main__':
+    for i in range(0, 8):
+        preprocessGTSRB(i)
