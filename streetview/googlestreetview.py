@@ -2,6 +2,15 @@ import requests
 import shutil
 import os
 
+########################################################
+####                                                ####
+####        Before beginning the crawling, an API   ####
+####        key has to be requested by google and   ####
+####        passed to the glob. variable "apiKey"   ####
+####                                                ####
+########################################################
+
+
 apikey = "AIzaSyDSqgeE_Cy47MlyqjZ7PIGF-mtj1Ve1Hio"
 baseURL = "https://maps.googleapis.com/maps/api/streetview"
 metaURL = baseURL + "/metadata"
@@ -97,6 +106,14 @@ def searchForSpeedLimitByLocation(path, location, pitch):
 
 
 def buildLocationFromAddress(street, city, zip=None, state=None):
+    """
+    builds an address string google can interprete by given substrings (simply comma separated)
+    :param street: street
+    :param city: city
+    :param zip: zip
+    :param state: state
+    :return: concatenated string
+    """
     location = street + ", " + city
     if zip is not None:
         location = location + ", " + zip
@@ -108,11 +125,12 @@ def buildLocationFromCoordinates(lat, lng):
     return lat + "," + lng
 
 def locationToImgFileName(locationString, heading):
+    """
+    helper method to build a valid filename from given parameters
+    :param locationString: concatenated string by @buildLocationFromAddress
+    :param heading: cardinal direction
+    :return: filename that is valid
+    """
     return "loc_" + locationString.replace(",", "_").replace(".", "_").replace(" ", "") + "head_" + str(heading).replace(".","")
 
-if __name__ == '__main__':
-    # checkStreetviewImageAvailability("Friedrichstrasse 78, Berlin, Germany",0,0)
-    pathz = os.path.dirname(os.path.abspath(__file__))
-    requestAndWriteImage(pathz, "Friedrichstrasse 78, Berlin, Germany",0,0)
-    requestAndWriteImage(pathz, "52.5339344,13.2990433", 0, 0)
 

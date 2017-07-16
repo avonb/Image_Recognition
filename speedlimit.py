@@ -4,6 +4,16 @@ import cv2
 import csv
 
 def detectSpeedLimitSign(imagepath, precision):
+    """
+    Provide your trained cascade here
+    takes an image from ABSOLUTE path (bug in cv2 for windows -> relative paths not working...)
+    and converts it to grayscale image, performs detection
+    :param imagepath: path to the image
+    :param precision: given threshhold to separate true/false positives, indicates
+                      the number of neighbours that have to be present ("true" pattern machings) in the search tree
+                      to identify an object
+    :return:
+    """
     speed_cascade = cv2.CascadeClassifier('cascade.xml')
 
     img = cv2.imread(imagepath)
@@ -14,6 +24,12 @@ def detectSpeedLimitSign(imagepath, precision):
 
 
 def markAndShowDetectedSpeedLimits(speed, img):
+    """
+    shows detected rectangles ("areas that are supposed to hold the desired object")
+    :param speed: the numpy array to hold coordinates of the rectangle
+    :param img: the image itself
+    :return:
+    """
     for (x, y, w, h) in speed:
         cv2.rectangle(img, (x, y), (x + w, y + h), (255, 0, 0), 2)
 
@@ -22,6 +38,11 @@ def markAndShowDetectedSpeedLimits(speed, img):
     cv2.destroyAllWindows()
 
 def iterateOverDataset():
+    """
+    method for testing purposes to see how many of the provided GTSRB images are correctly "detected"
+    please adjust the path!
+    :return:
+    """
     path = os.path.dirname(os.path.abspath(__file__))
 
     for group in ('00000','00001', '00001', '00002', '00003', '00004', '00005', '00007', '00008'):

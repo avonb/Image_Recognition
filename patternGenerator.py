@@ -3,6 +3,15 @@ import os
 import shutil
 import numpy as np
 
+########################################################
+####                                                ####
+####        Helper script to create the required    ####
+####        positive image file for opencv by given ####
+####        GTSRB street sign images                ####
+####        path has to be adjusted...              ####
+####                                                ####
+########################################################
+
 
 path = os.path.dirname(os.path.abspath(__file__))
 with open (path + "/info.txt", "w") as infofile:

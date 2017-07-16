@@ -62,24 +62,27 @@ def save(path, name, image, step, filetype = None):
     image.save(img_path + '/' + name)
 
 
-def preprocess(path, imagename, x1, y1, x2, y2):
+def preprocessMultiple(path, imagename, x1, y1, x2, y2):
     im = Image.open(path + '/' + imagename)
 
     im = resize(x1, y1, x2, y2, im, 40, 40)
     # print "Resized: " + row['Filename']
-    save(path, imagename, im, "resize")
+    save(path, imagenameToCrawledName(imagename,x1,y1,x2,y2), im, "resize")
 
     im = equalize(im)
     # print "Equalized: " + row['Filename']
-    save(path, imagename, im, "equalize")
+    save(path, imagenameToCrawledName(imagename,x1,y1,x2,y2), im, "equalize")
 
     im = im.filter(ImageFilter.SMOOTH_MORE)
     # print "Smoothed: " + row['Filename']
-    save(path, imagename, im, "smooth")
+    save(path, imagenameToCrawledName(imagename,x1,y1,x2,y2), im, "smooth")
 
     im = im.convert("L")
     # print "Reduced colors: " + row['Filename']
-    save(path, imagename, im, "grey", filetype="pgm")
+    save(path, imagenameToCrawledName(imagename,x1,y1,x2,y2), im, "grey", filetype="pgm")
+
+def imagenameToCrawledName(imagename,x1,y1,x2,y2):
+    return str(x1) + str(y1) + str(x2) + str(y2) + imagename
 
 def preprocessGTSRB(clazz):
     path = os.path.dirname(os.path.abspath(__file__))

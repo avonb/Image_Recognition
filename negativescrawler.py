@@ -1,6 +1,14 @@
 from streetview import googlestreetview
 import os
 
+########################################################
+####                                                ####
+####        Helper script to crawl ~1000 images     ####
+####        which possibly do not include street    ####
+####        signs to train the cascade              ####
+####                                                ####
+########################################################
+
 path = os.path.dirname(os.path.abspath(__file__))
 
 

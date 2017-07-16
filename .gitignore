@@ -45,3 +45,8 @@ info.txt
 *.vec
 
 *.RData
+
+!/crawledImages/grey/*
+!/crawledImages/equalize/*
+!/crawledImages/resize/*
+!/crawledImages/smooth/*

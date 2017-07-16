@@ -1,9 +1,12 @@
 install.packages("e1071")
+install.packages("gmum.r")
+
 
 library(pixmap)
 library(stringi)
 library(class)
 library(e1071)
+library(gmum.r)
 path = "/Users/Tobi/git/Image_Recognition/GTSRB/Final_Training/Images/"
 classes= c("00000","00001","00002","00003","00004","00005", "00007", "00008")
 
@@ -128,9 +131,30 @@ testFeatures = sapply(crawledImgs, function(x) {
                         testedFeatures
                 })
 testFeatures
-classificationKNN <- knn(t(a[[1]]), t(testFeatures[,"loc_52_5339344_13_2990433head_8732.pgm"]), a[[2]], k=3)
+#plot(x=testFeatures[,"loc_48_1241745_11_4916518head_2519.pgm"], y=testFeatures[c(1:1600),])
+classificationKNN <- knn(t(a[[1]]), t(testFeatures), a[[2]], k=3)
 classificationKNN
+
+
+##SVM OVA
+
 d = data.frame("Data"=t(a[[1]]), "Class"=a[[2]])
+
+#one vs all
+sv.ova <- SVM(Class ~ ., data=d, class.type="one.versus.all", verbosity=0)
+preds.ova <- predict(sv.ova, t(testFeatures))
+
+preds.ova
+#one vs one
+sv.ovo <- SVM(Class ~ ., data=d, class.type="one.versus.one", verbosity=0)
+preds.ovo <- predict(sv.ovo, t(testFeatures))
+
+preds.ovo
+
+
+
+#SVM OVO (default package)
+
 model <- svm(Class ~ ., data = d, cost = 100, gamma = 1)
 classificationSVM <- predict(model, t(testFeatures))
 classificationSVM #HOLY MOLY dauert das bei einem bild (okay, 12000 train daten) ewig?!?! wegen one vs. one?
@@ -138,7 +162,7 @@ classificationSVM #HOLY MOLY dauert das bei einem bild (okay, 12000 train daten)
 
 
 
-#evaluate performance on training data based on k-fold cross valudation
+#evaluate performance on training data based on k-fold cross validation
 
 a <- combinedData(classes, grey=TRUE)
 b <- create.samplegroups(a[[1]], a[[2]],600)
