@@ -85,5 +85,5 @@ def preprocess(clazz):
             #print "Reduced colors: " + row['Filename']
             save(path, row, im, "grey", filetype = "pgm")
 
-for i in range(0, 6):
+for i in range(7, 8):
     preprocess(i)
