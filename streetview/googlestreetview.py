@@ -11,7 +11,7 @@ import os
 ########################################################
 
 
-apikey = "AIzaSyDSqgeE_Cy47MlyqjZ7PIGF-mtj1Ve1Hio"
+apikey = ""
 baseURL = "https://maps.googleapis.com/maps/api/streetview"
 metaURL = baseURL + "/metadata"
 
