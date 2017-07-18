@@ -1,7 +1,12 @@
+install.packages("e1071")
+install.packages("gmum.r")
+
+
 library(pixmap)
 library(stringi)
 library(class)
 library(e1071)
+
 library(nnet)
 path = "/Users/arnevonberg/Documents/Image_Recognition/GTSRB/Final_Training/Images/"
 classes= c("00001","00002", "00004","00007")
@@ -124,8 +129,49 @@ pattern.recognition <- function(samples){
   print(paste(rightSVM, "out of", total, "signs were classified right by SVM"))
 }
 
+
+
+#Main Block for pattern recognition 
+##### RUN THIS ####
 a <- combinedData(classes, grey=TRUE)
 b <- create.samplegroups(a[[1]], a[[2]],600)
 c <- pattern.recognition(b)
+
+
+
+
+###################################################################
+#####                                                         #####
+#####               Google Streetview Extension               #####
+#####                                                         #####
+###################################################################
+
+#repeat if necessary
+a <- combinedData(classes, grey=TRUE)
+
+crawledImgPath = "/Users/Tobi/git/Image_Recognition/crawledImages/grey"
+
+crawledImgs <- list.files(path = crawledImgPath)
+
+testFeatures = sapply(crawledImgs, function(x) {
+                        img = read.pnm(paste(crawledImgPath, x, sep="/"))
+                        testedFeatures <- getChannels(img)
+                        dim(testedFeatures) <- NULL
+                        testedFeatures
+                })
+
+classificationKNN <- knn(t(a[[1]]), t(testFeatures), a[[2]], k=3)
+classificationKNN
+
+
+
+
+#SVM OVO (default package)
+
+model <- svm(Class ~ ., data = d, cost = 100, gamma = 1)
+classificationSVM <- predict(model, t(testFeatures))
+classificationSVM
+
+
 
 
