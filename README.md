@@ -31,7 +31,8 @@ this will also install other required libraries if not available yet (e.g. numpy
 python ./preprocess.py
 ```
 * This will ultimatively generate grayscale images from the first 8 classes   
-5. run the provided r script "sign_recognition.r" -> main block provided at the end
+5. open "sign_recognition.r" and change the path variable
+6. run the provided r script "sign_recognition.r" -> main block provided at the end
 
 ## Using the street view extension
 
