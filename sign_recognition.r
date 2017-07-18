@@ -4,7 +4,7 @@ library(class)
 library(e1071)
 library(nnet)
 path = "/Users/arnevonberg/Documents/Image_Recognition/GTSRB/Final_Training/Images/"
-classes= c("00001","00002", "00004","00007") #,"00002","00003","00004","00005")
+classes= c("00001","00002", "00004","00007")
 
 #Creates data frame from overview csv
 loadClassCSV <- function (class){
@@ -18,7 +18,6 @@ create.vector <- function (class, filename, grey = TRUE){
     #Monochromatic images have different file type
     filename = paste(substr(filename,1,stri_length(filename)-4), ".pgm", sep="")
   }
-  #TODO Preprocessing folder anpassen
   image <- read.pnm(paste(path, class,"/grey/", filename, sep=""))
   res <- getChannels(image)
   dim(res) <- NULL
@@ -55,11 +54,12 @@ create.samplegroups <- function(data, cl, size){
   n = length(cl)
   perm = sample(c(1:n), replace = FALSE)
   res = list()
+  # creates and saves permutation
   for(i in 0:floor(n/size-1)){
     upper = i * size + 1
     lower = i * size + size
     res[[i + 1]] <- list("data" = data[,perm[lower:upper]], 
-                       "class" = cl[perm[lower:upper]])
+                         "class" = cl[perm[lower:upper]])
   }
   res
 }
@@ -74,13 +74,15 @@ plot.vectorImage <- function(vec){
 pattern.recognition <- function(samples){
   reslist = list()
   total = 0;
-  rightKNN = rightSVM = rightANN = 0;
+  rightKNN = rightSVM = rightANN = rightNN = 0;
+  
+  #Creates training groups
   for(i in 1:length(samples)){
     train_data = c()
     train_cl = c()
     test_data = samples[[i]]$data
     test_cl = samples[[i]]$class
-    
+    #Combines data
     for(j in 1:length(samples)){
       if(i != j){
         tmp = samples[[j]]
@@ -90,64 +92,40 @@ pattern.recognition <- function(samples){
     }
     print(paste("Group", i, "of", length(samples), "is being tested"))
     
+    #Run KNN
     classificationKNN <- knn(t(train_data), t(test_data), train_cl, k=3)
     total = total + length(classificationKNN)
     rightKNN = rightKNN + sum(classificationKNN == test_cl) 
     print(paste("Finished KNN for this group.", rightKNN ,"/", total))
     
+    #Run KNN again, with k = 1
+    classificationNN <- knn(t(train_data), t(test_data), train_cl, k=1)
+    rightNN = rightNN + sum(classificationKNN == test_cl) 
+    print(paste("Finished KNN for this group.", rightNN ,"/", total))
+    
+    #Run ANN
     targets <- class.ind(train_cl)
-    netz <- nnet(t(train_data), targets, size = 2, rang = 0.5, 
-    decay = 5e-4, maxit = 100, MaxNWts = 5000)
+    netz <- nnet(t(train_data), targets, size = 4, rang = 0.5, 
+                 decay = 1, maxit = 200, MaxNWts = 5000)
     rightANN = rightANN + 
       sum(class.ind(test_cl) == round(predict(netz, t(test_data))))/2
     print(paste("Finished ANN for this group.", rightANN ,"/", total))
     
+    #Run SVM
     d = data.frame("Data"=t(train_data), "Class"=train_cl)
-    model <- svm(Class ~ ., data = d, cost = 100, gamma = 1)
+    model <- svm(Class ~ ., data = d, cost = 100, gamma = 1, kernel="polynomial")
     classificationSVM <- predict(model, t(test_data))
     rightSVM = rightSVM + sum(classificationSVM == test_cl)
     print(paste("Finished SVM for this group.", rightSVM ,"/", total))
   }
   print(paste(rightKNN, "out of", total, "signs were classified right by KNN"))
+  print(paste(rightNN, "out of", total, "signs were classified right by NN"))
   print(paste(rightANN, "out of", total, "signs were classified right by ANN"))
   print(paste(rightSVM, "out of", total, "signs were classified right by SVM"))
 }
 
-param.knn <- function(samples, params){
-  total = 0;
-  right = rep(0, length(params))
-  
-  for(i in 1:length(samples)){
-    train_data = c()
-    train_cl = c()
-    test_data = samples[[i]]$data
-    test_cl = samples[[i]]$class
-    
-    for(j in 1:length(samples)){
-      if(i != j){
-        tmp = samples[[j]]
-        train_data = cbind(train_data, tmp$data)
-        train_cl = c(train_cl, tmp$class)
-      }
-    }
-    print(paste("Group", i, "of", length(samples), "is being tested"))
-    total = total + length(test_cl)
-    
-    for(l in params){
-    d = data.frame("Data"=t(train_data), "Class"=train_cl)
-    model <- svm(Class ~ ., data = d, cost = l, gamma = 1, kernel = "polynomial")
-    classificationSVM <- predict(model, t(test_data))
-    right[l/10] = right[l/10] + sum(classificationSVM == test_cl)
-    print(paste("Finished SVM for this group.", right[l/10] ,"/", total))}
-
-    for(l in 1:length(params)){
-      print(paste("Param", params[l], "classified", right[l] ,"/", total,"right"))
-    }
-  }
-}
-
 a <- combinedData(classes, grey=TRUE)
 b <- create.samplegroups(a[[1]], a[[2]],600)
-#c <- pattern.recognition(b)
-d <- param.knn(b,c(1:20)*50)
+c <- pattern.recognition(b)
+
 
